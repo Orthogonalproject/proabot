@@ -54,6 +54,8 @@ int Motor::get_direction(){
 }
 void Motor::stop_motor(){
   set_pwm(0);
+  digitalWrite(_in2_p,LOW);
+  digitalWrite(_in1_p,LOW);
   _direction = STOP;
 }
 
