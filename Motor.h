@@ -15,12 +15,14 @@
 
 class Motor {
 public:
-	Motor(int pwm_p, int in1_p, int in2_p);
+	Motor(int pwm_p, int in1_p, int in2_p, int current_p);
 	void set_pwm(int pwm);
 	void change_to_direct();
 	void change_to_reverse();
-	int get_direction();
 	void stop_motor();
+	void sense_current();
+
+	int get_direction();
 
 	virtual ~Motor();
 
@@ -29,6 +31,11 @@ private:
   int _in2_p;
   int _pwm_p;
   int _direction;
+  int _current_p;
+
+  //don't need to access pwm value when operating
+  //motor, so pwm value is stored in rudder objects
+  //as power
 };
 
 #endif /* MOTOR_MOTOR_H_ */
