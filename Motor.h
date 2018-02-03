@@ -27,11 +27,11 @@ public:
 	virtual ~Motor();
 
 private:
-  int _in1_p;
-  int _in2_p;
-  int _pwm_p;
-  int _direction;
-  int _current_p;
+  int in1_p;
+  int in2_p;
+  int pwm_p;
+  int direction;
+  int current_p;
 
   //don't need to access pwm value when operating
   //motor, so pwm value is stored in rudder objects
