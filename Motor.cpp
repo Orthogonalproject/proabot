@@ -15,12 +15,7 @@
 #include <Arduino.h>
 #include "Motor.h"
 
-#define DIRECT 0
-#define REVERSE 1
-#define STOP 5
-#define HIGH_CURRENT 7
 
-#define CURRENT_THRESHOLD 40
 
 Motor::Motor(int pwm_p,int in1_p,int in2_p,int current_p)
 	:in1_p(in1_p),in2_p(in2_p),pwm_p(pwm_p),direction(STOP), current_p(current_p)

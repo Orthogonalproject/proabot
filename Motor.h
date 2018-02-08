@@ -11,7 +11,12 @@
 #ifndef MOTOR_MOTOR_H_
 #define MOTOR_MOTOR_H_
 
+#define DIRECT 0
+#define REVERSE 1
+#define STOP 5
+#define HIGH_CURRENT 7
 
+#define CURRENT_THRESHOLD 40
 
 class Motor {
 public:

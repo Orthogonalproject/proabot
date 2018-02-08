@@ -19,8 +19,8 @@
 
 double Kp=2, Ki=5, Kd=1;
 
-Rudder::Rudder(int position_p, Motor& m, PID &pid)
-	:position_p(position_p),position(0),motor(m),pid(pid),power(0),command(0),stat(GOOD)
+Rudder::Rudder(int position_p, Motor& m)
+	:position_p(position_p),stat(GOOD), command(0), power(0),position(0),motor(m)
 {
   //the controller should be set to 0 physically
 
@@ -45,6 +45,7 @@ void Rudder::update_position(){
 }
 
 int Rudder::get_position(){
+	this->update_position();
   return this->position;
 }
 
@@ -56,7 +57,7 @@ int Rudder::get_command(){
 	return this->command;
 }
 
-int Rudder::drive(){
+int Rudder::choose_direction(){
 
   if (this->stat != GOOD){
     return 1;
@@ -66,24 +67,26 @@ int Rudder::drive(){
 
   //within TOLERATE PID is off
   if (abs(this->command - this->position) < TOLERATE){
-    pid.SetMode(MANUAL);
+    //pid.SetMode(MANUAL);
     motor.stop_motor();
   }
 
   //direct
   else if (this->command - this->position > TOLERATE){
     //check motor direction, if reverse stop for a round
+	Serial.println("Go direct");
     if (this->motor.get_direction() == REVERSE){
       this->motor.stop_motor();
-      this->pid.SetMode(MANUAL);
-      this->motor.change_to_direct();
+      //this->pid.SetMode(MANUAL);
+      //this->motor.change_to_direct();
     }
     else{
+
       this->motor.change_to_direct();
-      this->pid.SetControllerDirection(DIRECT);
-      this->pid.SetMode(AUTOMATIC);
-      this->pid.Compute();
-      this->motor.set_pwm(this->power);
+      //this->pid.SetControllerDirection(DIRECT);
+      //this->pid.SetMode(AUTOMATIC);
+      //this->pid.Compute();
+      //this->motor.set_pwm(this->power);
     }
   }
 
@@ -92,14 +95,14 @@ int Rudder::drive(){
     //check motor direction, if direct stop for a round
     if (this->motor.get_direction() == DIRECT){
       this->motor.stop_motor();
-      this->pid.SetMode(MANUAL);
-      this->motor.change_to_reverse();
+      //this->pid.SetMode(MANUAL);
+      //this->motor.change_to_reverse();
     }
     else{
       this->motor.change_to_reverse();
-      this->pid.SetControllerDirection(REVERSE);
-      this->pid.SetMode(AUTOMATIC);
-      this->pid.Compute();
+      //this->pid.SetControllerDirection(REVERSE);
+      //this->pid.SetMode(AUTOMATIC);
+      //this->pid.Compute();
       this->motor.set_pwm(this->power);
     }
   }
@@ -121,6 +124,13 @@ void Rudder::set_command(double command){
   this->command = command;
 }
 
+void Rudder::drive(double power){
+	this->motor.set_pwm(power);
+}
+
+int Rudder::get_direction(){
+	return this->motor.get_direction();
+}
 Rudder::~Rudder() {
 	// TODO Auto-generated destructor stub
 }

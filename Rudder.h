@@ -11,29 +11,28 @@
 #ifndef RUDDER_RUDDER_H_
 #define RUDDER_RUDDER_H_
 
-#include <PID_v1.h>
 #include "Motor.h"
 
 class Rudder {
 public:
-	Rudder (int position_p, Motor& m, PID& pid);
-	int drive();
-	void set_command(double command);
+	Rudder (int position_p, Motor& m);
+	void drive(double power);
+	int choose_direction();
+	void set_command(double cmd);
 	void update_position();
 	int get_position();
 	int get_power();
 	int get_command();
-	void check_current();
-
+	int get_direction();
+	//void check_current();
+    double command;
+    double power;
+    double position;
 	virtual ~Rudder();
 
 private:
     int position_p;
-    double position;
     int stat;
-    double command;
-    double power;
-    PID& pid;
     Motor& motor;
 };
 
