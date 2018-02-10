@@ -15,61 +15,65 @@
 #include <Arduino.h>
 #include "Motor.h"
 
-#define DIRECT 0
-#define REVERSE 1
-#define STOP 5
-#define HIGH_CURRENT 7
 
-#define CURRENT_THRESHHOLD 50
 
 Motor::Motor(int pwm_p,int in1_p,int in2_p,int current_p)
-	:_in1_p(in1_p),_in2_p(in2_p),_pwm_p(pwm_p),_direction(STOP), _current_p(current_p)
+	:in1_p(in1_p),in2_p(in2_p),pwm_p(pwm_p),direction(STOP), current_p(current_p)
 {
 
   //set up
   pinMode(pwm_p,OUTPUT);
   pinMode(in1_p,OUTPUT);
   pinMode(in2_p,OUTPUT);
+  pinMode(current_p,INPUT);
 }
 
 void Motor::set_pwm(int pwm){
-	if (_direction!=HIGH_CURRENT)
-		analogWrite(_pwm_p,pwm);
+	if (direction!=HIGH_CURRENT)
+		analogWrite(pwm_p,pwm);
 }
 
 void Motor::change_to_direct(){
-  digitalWrite(_in1_p,HIGH);
-  digitalWrite(_in2_p,LOW);
-  _direction = DIRECT;
+	if(direction!=HIGH_CURRENT){
+		  digitalWrite(in1_p,HIGH);
+		  digitalWrite(in2_p,LOW);
+		  direction = DIRECT;
+	}
+
 }
 
 void Motor::change_to_reverse(){
-  digitalWrite(_in1_p,LOW);
-  digitalWrite(_in2_p,HIGH);
-  _direction = REVERSE;
+	if (direction!=HIGH_CURRENT){
+		digitalWrite(in1_p,LOW);
+		digitalWrite(in2_p,HIGH);
+		direction = REVERSE;
+	}
 }
 
 int Motor::get_direction(){
-  return _direction;
+  return direction;
 }
+
 void Motor::stop_motor(){
   set_pwm(0);
-  digitalWrite(_in2_p,LOW);
-  digitalWrite(_in1_p,LOW);
-  _direction = STOP;
+  digitalWrite(in2_p,LOW);
+  digitalWrite(in1_p,LOW);
+  direction = STOP;
 }
 
 void Motor::sense_current(){
-	if(_direction!= HIGH_CURRENT && analogRead(_current_p)>CURRENT_THRESHHOLD){
+	int current = analogRead(current_p);
+	Serial.println(current);
+	if(direction!= HIGH_CURRENT && current>CURRENT_THRESHOLD){
 		stop_motor();
-		_direction = HIGH_CURRENT;
+		direction = HIGH_CURRENT;
 		Serial.println("WARNING: HIGH_CURRENT[Motor Stopped.]");
 	}
-	else if(_direction == HIGH_CURRENT){
+	else if(direction == HIGH_CURRENT){
 		Serial.println("[R]eboot Motor? ");
 		if(Serial.available()){
 			if(Serial.read()=='R')
-				_direction = STOP;
+				direction = STOP;
 		}
 	}
 
