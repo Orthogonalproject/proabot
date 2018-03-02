@@ -18,7 +18,7 @@
 #define CURRENT_SENSING_DOWN 20
 #define POSITION_SENSING_DOWN 21
 #define CURRENT_WARNING
-#define TOLERATE 10
+#define TOLERATE 12
 
 double Kp=2, Ki=5, Kd=1;
 
@@ -49,7 +49,11 @@ void Rudder::update_setpoint(double setpoint_received){
 
 void Rudder::Compute_and_Drive(){
 	int dir = motor->get_direction();
-	if (dir==HIGH_CURRENT){}
+	if (dir==HIGH_CURRENT){
+		pid->SetMode(MANUAL);
+		output = 0;
+		motor->ask_reboot();
+	}
 	   //compute_and_drive only operates when NOT(HIGH_CURRENT)
 	else{
 		update_position();
@@ -81,6 +85,8 @@ void Rudder::print(){
 	Serial.println(position);
 	Serial.print("\tOutput: ");
 	Serial.println(output);
+	Serial.print("\t# Direction: ");
+	Serial.println(motor->get_direction());
 	// current_sensing is printed inside it's method. It should be called right after this so that you can see which current it's showing. Read issues for more detail.
 }
 

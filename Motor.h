@@ -26,6 +26,7 @@ public:
 	void change_to_reverse();
 	void stop_motor();
 	void sense_current();
+	void ask_reboot();
 
 	int get_direction();
 
