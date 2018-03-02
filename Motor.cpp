@@ -63,21 +63,23 @@ void Motor::stop_motor(){
 
 void Motor::sense_current(){
 	int current = analogRead(current_p);
+	Serial.print("\t# Current: ");
 	Serial.println(current);
 	if(direction!= HIGH_CURRENT && current>CURRENT_THRESHOLD){
 		stop_motor();
 		direction = HIGH_CURRENT;
 		Serial.println("WARNING: HIGH_CURRENT[Motor Stopped.]");
 	}
-	else if(direction == HIGH_CURRENT){
-		Serial.println("[R]eboot Motor? ");
-		if(Serial.available()){
-			if(Serial.read()=='R')
-				direction = STOP;
-		}
-	}
 
 }
+
+void Motor::ask_reboot()
+{
+	Serial.println("[R]eboot? ");
+	if(Serial.read()=='R')
+		direction = STOP;
+}
+
 
 Motor::~Motor() {
 	// TODO Auto-generated destructor stub

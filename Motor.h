@@ -8,8 +8,8 @@
  *  Known Issues:
  */
 
-#ifndef MOTOR_MOTOR_H_
-#define MOTOR_MOTOR_H_
+#ifndef MOTOR_H
+#define MOTOR_H
 
 #define DIRECT 0
 #define REVERSE 1
@@ -26,10 +26,11 @@ public:
 	void change_to_reverse();
 	void stop_motor();
 	void sense_current();
+	void ask_reboot();
 
 	int get_direction();
 
-	virtual ~Motor();
+	~Motor();
 
 private:
   int in1_p;
@@ -43,4 +44,4 @@ private:
   //as power
 };
 
-#endif /* MOTOR_MOTOR_H_ */
+#endif /* MOTOR_MOTOR_H */

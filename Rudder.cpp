@@ -5,145 +5,107 @@
  *      Author: Steven Hu
  *  >>Project Orthogonal  -Proabot
  *  Known Issues:
+ *    1. position is given a voltage value which is not useful for display, should
+ *       add a mapping function to return degrees.
  */
 
 #include "Rudder.h"
+//#include "Motor.h"
 #include <Arduino.h>
+//#include <PID_v1.h>
 
 #define GOOD 15
 #define CURRENT_SENSING_DOWN 20
 #define POSITION_SENSING_DOWN 21
 #define CURRENT_WARNING
-#define CURRENT_LIMIT 250
-#define TOLERATE 8
+#define TOLERATE 12
 
 double Kp=2, Ki=5, Kd=1;
 
-Rudder::Rudder(int position_p, Motor& m)
-	:position_p(position_p),stat(GOOD),motor(m), command(0),power(0),position(0)
+Rudder::Rudder(int position_p, int pwm_p, int in1_p, int in2_p, int current_p)
+	:position_p(position_p), setpoint(0), output(0), position(0),
+	 motor(new Motor(pwm_p,in1_p,in2_p,current_p)),
+	 pid(new PID(&position, &output, &setpoint, Kp,Ki,Kd,DIRECT))
+
 {
   //the controller should be set to 0 physically
-
-
-  //initialize PID
-  //PID _pid(&this->_position, &this->_power, &this->_command, Kp,Ki,Kd,DIRECT);
-  //this->_pid.SetOutputLimits(0,255); this is the default in the source code
-  //this->_pid.SetSampleTime(100); this is the default setting
-
   //stat is initialized to GOOD
-   //the first update_position might detect error
-  //_stat = GOOD;
 
   //update position
-  this->update_position();
+	update_position();
+	pid->SetSampleTime(3000);
+	pid->SetOutputLimits(-255,255);
+	pid->SetMode(AUTOMATIC);
 
 }
 
 void Rudder::update_position(){
-  this->position = analogRead(this->position_p);
+	position = analogRead(position_p);
+}
 
+void Rudder::update_setpoint(double setpoint_received){
+	setpoint = setpoint_received;
+} //setpoint should be updated before Compute_and_Drive()
+
+void Rudder::Compute_and_Drive(){
+	int dir = motor->get_direction();
+	if (dir==HIGH_CURRENT){
+		pid->SetMode(MANUAL);
+		output = 0;
+		motor->ask_reboot();
+	}
+	   //compute_and_drive only operates when NOT(HIGH_CURRENT)
+	else{
+		update_position();
+		if (abs(setpoint-position) < TOLERATE){
+			motor->stop_motor();
+			pid->SetMode(MANUAL);
+			output = 0;
+		}
+
+		else{
+			pid->SetMode(AUTOMATIC);
+			pid->Compute(); //output is computed
+			if (output<0){
+				motor->change_to_reverse();
+				motor->set_pwm(-output);
+			}
+			else{
+				motor->change_to_direct();
+				motor->set_pwm(output);
+			}
+		}
+	}
+}
+
+void Rudder::print(){
+	Serial.print("\tSetpoint: ");
+	Serial.println(setpoint);
+	Serial.print("\tPosition: ");
+	Serial.println(position);
+	Serial.print("\tOutput: ");
+	Serial.println(output);
+	Serial.print("\t# Direction: ");
+	Serial.println(motor->get_direction());
+	// current_sensing is printed inside it's method. It should be called right after this so that you can see which current it's showing. Read issues for more detail.
 }
 
 int Rudder::get_position(){
-	this->update_position();
-  return this->position;
+	update_position();
+	return position;
 }
 
-int Rudder::get_power(){
-  return this->power;
+int Rudder::get_output(){
+  return output;
 }
 
-int Rudder::get_command(){
-	return this->command;
+int Rudder::get_stat(){
+	return motor->get_direction();
 }
 
-int Rudder::choose_direction(){
 
-  if (this->stat != GOOD){
-    return 1;
-  }
 
-  this->update_position();
-
-  //within TOLERATE PID is off
-  if (abs(this->command - this->position) < TOLERATE){
-    //pid.SetMode(MANUAL);
-    motor.stop_motor();
-  }
-
-  //direct
-  else if (this->command - this->position > TOLERATE){
-    //check motor direction, if reverse stop for a round
-    if (this->motor.get_direction() == REVERSE){
-      Serial.println("stop");
-    	this->motor.stop_motor();
-
-      //this->pid.SetMode(MANUAL);
-      //this->motor.change_to_direct();
-    }
-    else if (this->motor.get_direction() == STOP){
-    	Serial.println("change to direct");
-      this->motor.change_to_direct();
-      //this->pid.SetControllerDirection(DIRECT);
-      //this->pid.SetMode(AUTOMATIC);
-      //this->pid.Compute();
-      //this->motor.set_pwm(this->power);
-    }
-  }
-
-  //reverse
-  else if(this->position - this->command > TOLERATE){
-    //check motor direction, if direct stop for a round
-    if (this->motor.get_direction() == DIRECT){
-    	Serial.println("stop");
-      this->motor.stop_motor();
-      //this->pid.SetMode(MANUAL);
-      //this->motor.change_to_reverse();
-    }
-    else if (this->motor.get_direction() == STOP){
-      this->motor.change_to_reverse();
-
-      //this->pid.SetControllerDirection(REVERSE);
-      //this->pid.SetMode(AUTOMATIC);
-      //this->pid.Compute();
-      //this->motor.set_pwm(this->power);
-    }
-    Serial.print("now motor direction is: ");
-    Serial.println(motor.get_direction());
-  }
-
-  return 0;
-
-}
-
-void Rudder::set_direction(int direction){
-	if(direction==DIRECT)
-		motor.change_to_direct();
-	else if(direction==REVERSE)
-		motor.change_to_reverse();
-  else if(direction==STOP)
-    motor.stop_motor();
-}
-//void Rudder::check_current(){
-//  int current = analogRead(this->_current_p);
-//  Serial.println(current);
-//  if ( current > CURRENT_LIMIT){
-//    this->_motor.stop_motor();
-//    //this->_stat = CURRENT_WARNING;
-//  }
-//}
-
-void Rudder::set_command(double command){
-  this->command = command;
-}
-
-void Rudder::drive(double power){
-	this->motor.set_pwm(power);
-}
-
-int Rudder::get_direction(){
-	return this->motor.get_direction();
-}
 Rudder::~Rudder() {
-	// TODO Auto-generated destructor stub
+	delete motor;
+	delete pid;
 }
