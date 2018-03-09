@@ -1,5 +1,6 @@
+#include <LiquidCrystal_I2C_v2.h>
+
 #include <Wire.h>
-#include <LiquidCrystal_I2C.h>
 // Set the LCD address to 0x3F for a 16 chars and 2 line display
 // see scanner code for how to get address
 
@@ -9,7 +10,7 @@ unsigned long time_now = 0;
 void setup()
 {
 	// initialize the LCD
-	lcd.init();
+	lcd.begin();
 	lcd.backlight();
 }
 void loop()
