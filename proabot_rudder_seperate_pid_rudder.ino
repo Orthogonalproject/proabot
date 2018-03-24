@@ -1,8 +1,8 @@
 /*
- * motor_test.ino
- * > A test file for the motor control board and
- * > Class Motor.
- *
+ * proabot_rudder_seperate_pif_rudder.ino    Feb 2018
+ * > 
+ * > A newer version "boat_program_beta.ino" is 
+ * > made to hide the implementation of PID and motor.
  * Author: Steven Hu
  * >Project Orthogonal  -Proabot
  */

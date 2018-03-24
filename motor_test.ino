@@ -1,5 +1,5 @@
 /*
- * motor_test.ino
+ * motor_test.ino   Feb 2018
  * > A test file for the motor control board and
  * > Class Motor.
  *

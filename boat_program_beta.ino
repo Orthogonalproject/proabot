@@ -1,3 +1,9 @@
+/*
+ * boat_program_beta.ino    March 2018
+ * Author: Steven, Asis
+ * >> Implemented:
+ *   1.nrf	2.PID	 
+ */
 #include "Arduino.h"
 #include <SPI.h>
 #include <RF24.h>
@@ -11,7 +17,8 @@ double data_to_send[4] = {0,50, 1,1};
 double received_data[2];   //received_data[0] = r1_setpoint, [1] = r2_setpoint
 
 RF24 radio(9,53);
-byte addresses[][6] = {"1Node","2Node"}; // ??
+byte addresses[][6] = {"1Node","2Node"}; 
+  //names of the two communication(2 directions)
 
 Rudder r1(15,5,28,29,3);
 Rudder r2(1,1,1,1,1);
