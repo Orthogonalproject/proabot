@@ -4,6 +4,7 @@
 #include "LiquidCrystal_I2C_v2.h"
 
 
+
 // Hardware configuration: Set up nRF24L01 radio on SPI bus (pins 10, 11, 12, 13) plus pins 7 & 8
 RF24 radio(9, 53);
 byte addresses[][6] = {"1Node", "2Node"};
@@ -53,10 +54,12 @@ void show_info(){
 
 }
 
-void loop() {
-	void show_info();
-	data_to_send[0] = analogRead(A1); //setpoint from pot
+void update_setpoint(){
+	data_to_send[0] = analogRead(A1); //r1_setpoint
+	data_to_send[1] = 50;
+}
 
+void radio_write(){
 	// Ensure we have stopped listening (even if we're not) or we won't be able to transmit
 	radio.stopListening();
 
@@ -66,7 +69,9 @@ void loop() {
 		//Serial.println("No acknowledgement of transmission - receiving radio device connected?");
 	}
 	radio.write(&data_to_send,sizeof(data_to_send));
+}
 
+void radio_read(){
 	// Now listen for a response
 	radio.startListening();
 
@@ -77,16 +82,18 @@ void loop() {
 	while ( ! radio.available() ) {
 
     // Oh dear, no response received within our timescale
-    if (millis() - started_waiting_at > 100 ) {
-    	Serial.println("No response received - timeout!");
-    	return;
-    }
-}
+		if (millis() - started_waiting_at > 100 ) {
+			Serial.println("No response received - timeout!");
+			return;
+		}
+	}
 
 	// Now read the data that is waiting for us in the nRF24L01's buffer
 
 	radio.read( &data_receive, sizeof(data_receive) );
+}
 
+void monitor_print(){
 	// Show user what we sent and what we got back
 	Serial.print("Sent setpoint: ");
 	Serial.println(data_to_send[0]);
@@ -95,6 +102,18 @@ void loop() {
 	Serial.println(data_receive[0]);
 	Serial.print("\tr2 position: ");
 	Serial.println(data_receive[1]);
-  	if (data_receive[3]==7)
-  		Serial.println("\t r1 stopped due to HIGH_CURRENT_ERROR");
+	if (data_receive[3]==7)
+		Serial.println("\t r1 stopped due to HIGH_CURRENT_ERROR");
+}
+
+void loop() {
+
+	show_info();
+	update_setpoint();
+
+	radio_write();
+	radio_read();
+
+	monitor_print();
+
 }
