@@ -16,7 +16,7 @@
 #define STOP 5
 #define HIGH_CURRENT 7
 
-#define CURRENT_THRESHOLD 40
+#define CURRENT_THRESHOLD 150
 
 class Motor {
 public:
@@ -30,8 +30,11 @@ public:
 
 	int get_direction();
 
-	~Motor();
-
+/*
+ * don't need to access pwm value when operating
+ *motor, so pwm value is stored in rudder objects
+ *as power
+ */
 private:
   int in1_p;
   int in2_p;
@@ -39,9 +42,6 @@ private:
   int direction;
   int current_p;
 
-  //don't need to access pwm value when operating
-  //motor, so pwm value is stored in rudder objects
-  //as power
 };
 
 #endif /* MOTOR_MOTOR_H */

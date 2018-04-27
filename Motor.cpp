@@ -20,7 +20,6 @@
 Motor::Motor(int pwm_p,int in1_p,int in2_p,int current_p)
 	:in1_p(in1_p),in2_p(in2_p),pwm_p(pwm_p),direction(STOP), current_p(current_p)
 {
-
   //set up
   pinMode(pwm_p,OUTPUT);
   pinMode(in1_p,OUTPUT);
@@ -80,7 +79,3 @@ void Motor::ask_reboot()
 		direction = STOP;
 }
 
-
-Motor::~Motor() {
-	// TODO Auto-generated destructor stub
-}
