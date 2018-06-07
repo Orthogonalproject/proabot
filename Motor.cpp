@@ -1,14 +1,10 @@
 /*
  * Motor.cpp
  *
- *  Created: Jan, 2018
+ *  Created: January 5, 2018
+ *  Updated: June 6, 2018
  *      Author: Steven Hu
  *  >>Project Orthogonal  -Proabot
- *
- *  Known Issues:
- *  1.current sensing is enforced. no way to bypass it. it does give an option to restart the motor, but
- *    if issue remains, it will be stopped at the next cycle. should add a method to bypass it.
- *  2.current reading for different motors are different.
  *
  */
 
